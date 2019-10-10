@@ -13,14 +13,14 @@ phases:
   pre_build:
       commands:
         - TAG="$REPOSITORY_NAME.$REPOSITORY_BRANCH.$ENVIRONMENT_NAME.$(date +%Y-%m-%d.%H.%M.%S).$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | head -c 8)"
-        - sed -i 's@CONTAINER_IMAGE@'"165942629469.dkr.ecr.us-east-1.amazonaws.com/eksws-ecrdo-1n7jidbdotx86:$TAG"'@' hello-k8s.yml
+        - sed -i 's@CONTAINER_IMAGE@'"165942629469.dkr.ecr.us-east-1.amazonaws.com/eksws-ecrdo-1n7jidbdotx86:latest"'@' hello-k8s.yml
         - $(aws ecr get-login --no-include-email)
         - export KUBECONFIG=$HOME/.kube/config
   build:
     commands:
       - docker build -t eksws-ecrdo-1n7jidbdotx86 .
-      - docker tag eksws-ecrdo-1n7jidbdotx86:latest 165942629469.dkr.ecr.us-east-1.amazonaws.com/eksws-ecrdo-1n7jidbdotx86:$TAG
-      - docker push 165942629469.dkr.ecr.us-east-1.amazonaws.com/eksws-ecrdo-1n7jidbdotx86:$TAG
+      - docker tag eksws-ecrdo-1n7jidbdotx86:latest 165942629469.dkr.ecr.us-east-1.amazonaws.com/eksws-ecrdo-1n7jidbdotx86:latest
+      - docker push 165942629469.dkr.ecr.us-east-1.amazonaws.com/eksws-ecrdo-1n7jidbdotx86:latest
   post_build:
     commands:
       - CREDENTIALS=$(aws sts assume-role --role-arn arn:aws:iam::165942629469:role/EksWorkshopCodeBuildKubectlRole --role-session-name codebuild-kubectl --duration-seconds 900)
@@ -32,6 +32,6 @@ phases:
       - kubectl version --short
       - kubectl get nodes
       - kubectl apply -f hello-k8s.yml
-      - printf '[{"name":"hello-k8s","imageUri":"%s"}]' 165942629469.dkr.ecr.us-east-1.amazonaws.com/eksws-ecrdo-1n7jidbdotx86:$TAG > build.json
+      - printf '[{"name":"hello-k8s","imageUri":"%s"}]' 165942629469.dkr.ecr.us-east-1.amazonaws.com/eksws-ecrdo-1n7jidbdotx86:latest > build.json
 artifacts:
   files: build.json
